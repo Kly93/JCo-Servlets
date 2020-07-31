@@ -75,7 +75,7 @@ public class ProductsRFC extends HttpServlet {
             for (int i = 0; i < myTable.getNumRows(); i++, myTable.nextRow()) 
             { 
             	myTable.setRow(i);
-            	responseJson.put("No of rows", myTable.getString("Jo"));        	
+            	responseJson.put("No of rows", myTable.getString("TITLE"));        	
             }
             
             //Execute the RFC via the SAP CP Destination
