@@ -56,53 +56,46 @@ public class ProductsRFC extends HttpServlet {
             
             // Make an invocation of STFC_CONNECTION in the backend
             JCoRepository repo=destination.getRepository();
-            JCoFunction stfcConnection=repo.getFunction("STFC_CONNECTION");        
+            JCoFunction stfcConnection=repo.getFunction("ZT_CATEGORIES");
             
+            // Set Importing Parameter REQUTEXT for the RFC
+            JCoParameterList imports=stfcConnection.getImportParameterList();
+            //imports.setValue("ID", "SAP HANA Cloud connectivity for SAP CP Workflow");
+            imports.setValue("CATEGORY", "TEST");
             
-            // Write data to table of import parameter
-            JCoParameterList myField = stfcConnection.getImportParameterList();
-            //myTable.appendRow();
-            //myTable.setValue("JO", "Wasgeht");
+            // WORKS!!
+            JCoTable myTable = stfcConnection.getTableParameterList().getTable("PRODUCTS");
+            myTable.appendRow();
+            myTable.setValue("ID", 12);
+            myTable.setValue("TITLE", "Jo");
             
-          //Execute the RFC via the SAP CP Destination
-            stfcConnection.execute(destination);
+         // Output of this servlet needs to be JSON if consumed from SAP CP Workflow
+            JSONObject responseJson = new JSONObject();
             
-            // Read data from Function module table
-            
-            JSONObject prodElemJson = new JSONObject();
-
-            /*for (int i = 0; i < myTable.getNumRows(); i++, myTable.nextRow()) 
+            for (int i = 0; i < myTable.getNumRows(); i++, myTable.nextRow()) 
             { 
             	myTable.setRow(i);
-            	prodElemJson.put("TITLE from DB", myTable.getRow());        	
-            }*/
+            	responseJson.put("No of rows", myTable.getString("Jo"));        	
+            }
             
+            //Execute the RFC via the SAP CP Destination
+            stfcConnection.execute(destination);
             
-            response.addHeader("Content-type", "application/json");
-            response.addHeader("Access-Control-Allow-Origin", "*");
-            responseWriter.write(prodElemJson.toString());         
+            // Get the exporting parameters ECHOTEXT and RESPTEXT of the RFC
+            JCoParameterList exports=stfcConnection.getExportParameterList();
+            //String echotext=exports.getString("ECHOID");
+            String resptext=exports.getString("ECHOCAT");
+           
             
-            // Products Object 
-            /*JSONObject prodElemListJson = new JSONObject();
-            prodJson.put("products", prodElemListJson);
-            
-            JSONObject prodElemJson = new JSONObject();
-            prodElemJson.put("category", import_result);
-            prodElemJson.put("imageUrl", "");
-            prodElemJson.put("price", "");
-            prodElemJson.put("title", "");
-            
-            prodElemListJson.put("ID", prodElemJson);
-                      
             // Form the JSON object
-            response.setCharacterEncoding("UTF-8");
-                   
+            //responseJson.put("echoid", echotext);
+            responseJson.put("echocat", resptext);
             // LINE NO 57 
+            
             response.addHeader("Content-type", "application/json");
             response.addHeader("Access-Control-Allow-Origin", "*");
-            
             // Set the response as the JSON STRING
-            responseWriter.write(prodJson.toString());*/
+            responseWriter.write(responseJson.toString());
 			} catch (AbapException ae) {
 			ae.printStackTrace();
         } catch (JCoException e) {
